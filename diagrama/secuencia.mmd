@@ -1,0 +1,13 @@
+mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant UI as Interfaz
+    participant S as Servicio
+    participant R as Repositorio
+
+    U->>UI: Seleccionar opción
+    UI->>S: invocar operación
+    S->>R: leer o actualizar inventario
+    R-->>S: resultados
+    S-->>UI: devolver datos o confirmación
+    UI-->>U: mostrar información

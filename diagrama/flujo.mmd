@@ -1,0 +1,11 @@
+mermaid
+flowchart TD
+    A[Inicio] --> B{Opción}
+    B --> |Registrar producto| C[Solicitar datos]
+    C --> D[Guardar inventario]
+    B --> |Registrar venta| E[Solicitar datos]
+    E --> F[Restar stock]
+    B --> |Consultar inventario| G[Mostrar lista]
+    B --> |Productos bajo stock| H[Revisar cantidades]
+    H --> I[Mostrar alerta]
+    B --> |Salir| J[Fin]
