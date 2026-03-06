@@ -9,10 +9,24 @@ Responsabilidades:
 - Generar un registro de la venta para su almacenamiento.
 """
 
-# Dependencias y mapeos (sin implementar lógica aún)
-from services.inventario_service import InventarioService
-from models.producto import Producto
-from persistence.json_repository import JsonRepository
+class VentaService:
+    def __init__(self, inventario_service):
+        self.inventario_service = inventario_service
 
+    def realizar_venta(self, nombre_producto, cantidad):
+        producto = self.inventario_service.buscar_producto(nombre_producto)
+        
+        if not producto:
+            print("El producto no existe.")
+            return
 
-# TODO: definir clase VentaService con métodos y validaciones
+        if cantidad > producto.cantidad:
+            print(f"No hay suficiente stock. Disponible: {producto.cantidad}")
+            return
+
+        # Restamos stock
+        nuevo_stock = producto.cantidad - cantidad
+        self.inventario_service.actualizar_stock(nombre_producto, nuevo_stock)
+        
+        total = cantidad * producto.precio
+        print(f"Venta realizada. Total a pagar: ${total}")

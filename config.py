@@ -2,6 +2,6 @@
 CONFIGURACIONES GENERALES
 """
 
-# TODO: Definir configuraciones globales
-STOCK_MINIMO = None
-RUTA_ARCHIVO = None
+# Configuración global del sistema
+STOCK_MINIMO = 5
+RUTA_ARCHIVO = "data/inventario.json"

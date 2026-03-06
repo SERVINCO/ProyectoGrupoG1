@@ -9,8 +9,19 @@ Responsabilidades:
 - Proveer representación en texto (__str__) para mostrar al usuario.
 """
 
-# Dependencias y mapeos (sin implementar lógica aún)
-from __future__ import annotations
+class Producto:
+    def __init__(self, nombre, cantidad, precio=0.0):
+        self.nombre = nombre
+        self.cantidad = cantidad
+        self.precio = precio
 
+    def to_dict(self):
+        # Convertimos el objeto a un diccionario para poder guardarlo en JSON
+        return {
+            "nombre": self.nombre,
+            "cantidad": self.cantidad,
+            "precio": self.precio
+        }
 
-# TODO: implementar la clase Producto con los métodos descritos
+    def __str__(self):
+        return f"{self.nombre} (Cantidad: {self.cantidad}) - ${self.precio}"

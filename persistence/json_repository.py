@@ -11,7 +11,24 @@ Responsabilidades:
 # Dependencias y mapeos (sin implementar lógica aún)
 import json
 import os
-from typing import Any, Dict
 
+# Funciones simples para leer y guardar archivos
+def cargar_datos(ruta_archivo):
+    # Si el archivo no existe, retornamos una lista vacía
+    if not os.path.exists(ruta_archivo):
+        return []
+    
+    try:
+        with open(ruta_archivo, 'r') as archivo:
+            return json.load(archivo)
+    except:
+        return []
 
-# TODO: implementar la clase JsonRepository con las operaciones mencionadas
+def guardar_datos(ruta_archivo, datos):
+    # Nos aseguramos que la carpeta exista (por si acaso)
+    carpeta = os.path.dirname(ruta_archivo)
+    if carpeta and not os.path.exists(carpeta):
+        os.makedirs(carpeta)
+        
+    with open(ruta_archivo, 'w') as archivo:
+        json.dump(datos, archivo, indent=4)

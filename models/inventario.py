@@ -13,8 +13,20 @@ Responsabilidades:
 
 # Dependencias y mapeos (sin implementar lógica aún)
 from __future__ import annotations
-from typing import List
 from models.producto import Producto
 
+class Inventario:
+    def __init__(self):
+        self.productos = {} # Diccionario para guardar productos: nombre -> objeto Producto
 
-# TODO: definir la clase Inventario con los métodos especificados
+    def agregar_producto(self, producto):
+        # Guardamos el producto usando su nombre como clave
+        self.productos[producto.nombre] = producto
+
+    def buscar_producto(self, nombre):
+        # Devuelve el producto si existe, o None si no existe
+        return self.productos.get(nombre)
+
+    def listar_productos(self):
+        # Devuelve una lista con todos los objetos Producto
+        return list(self.productos.values())

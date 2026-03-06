@@ -2,17 +2,17 @@
 PUNTO DE ENTRADA DEL SISTEMA
 """
 
-# TODO:
-# - Importar módulos
-# - Inicializar repositorio
-# - Cargar inventario
-# - Crear servicios
-# - Implementar menú principal
-# - Manejar excepciones
+from services.inventario_service import InventarioService
+from services.venta_service import VentaService
+from ui.menu import mostrar_menu
 
 def main():
-    # TODO: Implementar flujo principal
-    pass
+    # Creamos los servicios
+    servicio_inventario = InventarioService()
+    servicio_venta = VentaService(servicio_inventario)
+    
+    # Iniciamos el menú
+    mostrar_menu(servicio_inventario, servicio_venta)
 
 if __name__ == "__main__":
     main()
