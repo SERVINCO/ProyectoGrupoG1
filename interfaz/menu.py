@@ -1,0 +1,167 @@
+"""
+INTERFAZ DE USUARIO (Menú)
+--------------------------
+Este archivo controla lo que ves en la pantalla (el menú).
+Es como el "control remoto" de la aplicación.
+Usa un sistema de diccionario (parecido a un 'switch') para elegir qué hacer.
+"""
+
+import sys
+
+# --- Funciones para el Menú de Inventario ---
+
+def opcion_agregar_producto(servicio):
+    """Pide datos al usuario y llama al servicio para agregar un producto."""
+    nombre = input("Nombre del producto: ")
+    try:
+        cantidad = int(input("Cantidad inicial: "))
+        precio = float(input("Precio unitario: "))
+        servicio.agregar_producto(nombre, cantidad, precio)
+    except ValueError:
+        print("¡Error! Debes ingresar números válidos para cantidad y precio.")
+
+def opcion_buscar_producto(servicio):
+    """Pide un nombre y busca si el producto existe."""
+    nombre = input("Nombre a buscar: ")
+    producto = servicio.buscar_producto(nombre)
+    if producto:
+        print(f"-> Encontrado: {producto.convertir_a_texto()}")
+    else:
+        print("-> El producto no está en el inventario.")
+
+def opcion_actualizar_stock(servicio):
+    """Pide un nombre y una nueva cantidad para actualizar el stock."""
+    nombre = input("Nombre del producto: ")
+    try:
+        cantidad = int(input("Nueva cantidad total: "))
+        servicio.actualizar_stock(nombre, cantidad)
+    except ValueError:
+        print("¡Error! La cantidad debe ser un número entero.")
+
+def opcion_listar_productos(servicio):
+    """Muestra todos los productos."""
+    servicio.listar_productos()
+
+def opcion_volver_menu_principal(servicio):
+    """Saled del bucle del sub-menú (retorna control al menú principal)."""
+    return "salir" # Retornamos una señal para romper el bucle
+
+# --- Funciones para el Menú de Ventas ---
+
+def opcion_nueva_venta(servicio):
+    """Registra una venta pidiendo producto y cantidad."""
+    nombre = input("Nombre del producto a vender: ")
+    try:
+        cantidad = int(input("Cantidad a vender: "))
+        servicio.realizar_venta(nombre, cantidad)
+    except ValueError:
+        print("¡Error! La cantidad debe ser un número entero.")
+
+def opcion_listar_ventas(servicio):
+    """Muestra el historial."""
+    servicio.listar_ventas()
+
+def opcion_editar_venta(servicio):
+    """Permite corregir una venta anterior."""
+    try:
+        id_venta = int(input("ID de la venta a editar: "))
+        nueva_cant = int(input("Nueva cantidad real: "))
+        servicio.actualizar_venta(id_venta, nueva_cant)
+    except ValueError:
+        print("¡Error! Debes ingresar números enteros.")
+
+def opcion_eliminar_venta(servicio):
+    """Borra una venta del historial."""
+    try:
+        id_venta = int(input("ID de la venta a eliminar: "))
+        servicio.eliminar_venta(id_venta)
+    except ValueError:
+        print("¡Error! El ID debe ser un número.")
+
+# --- Estructura de los Menús ---
+
+def mostrar_menu_inventario(servicio_inventario):
+    """
+    Muestra las opciones de inventario.
+    Usa un diccionario 'acciones' para simular un Switch/Case.
+    """
+    acciones = {
+        '1': opcion_agregar_producto,
+        '2': opcion_buscar_producto,
+        '3': opcion_actualizar_stock,
+        '4': opcion_listar_productos,
+        '5': opcion_volver_menu_principal
+    }
+
+    while True:
+        print("\n--- GESTIÓN DE INVENTARIO ---")
+        print("1. Agregar producto")
+        print("2. Buscar producto")
+        print("3. Actualizar stock")
+        print("4. Listar productos")
+        print("5. Volver al menú principal")
+
+        opcion = input("Elige una opción: ")
+
+        # Busca la función en el diccionario. Si no existe, devuelve None via 'get'
+        funcion = acciones.get(opcion)
+
+        if funcion:
+            resultado = funcion(servicio_inventario)
+            if resultado == "salir":
+                break
+        else:
+            print("Opción no válida, intenta de nuevo.")
+
+def mostrar_menu_ventas(servicio_ventas):
+    """
+    Muestra las opciones de ventas.
+    """
+    acciones = {
+        '1': opcion_nueva_venta,
+        '2': opcion_listar_ventas,
+        '3': opcion_editar_venta,
+        '4': opcion_eliminar_venta,
+        '5': opcion_volver_menu_principal
+    }
+
+    while True:
+        print("\n--- GESTIÓN DE VENTAS ---")
+        print("1. Registrar nueva venta")
+        print("2. Listar historial de ventas")
+        print("3. Editar venta")
+        print("4. Eliminar venta")
+        print("5. Volver al menú principal")
+
+        opcion = input("Elige una opción: ")
+
+        funcion = acciones.get(opcion)
+
+        if funcion:
+            resultado = funcion(servicio_ventas)
+            if resultado == "salir":
+                break
+        else:
+            print("Opción no válida, intenta de nuevo.")
+
+def mostrar_menu(servicio_inventario, servicio_ventas):
+    """
+    Menú Principal.
+    """
+    while True:
+        print("\n=== SISTEMA DE GESTIÓN ===")
+        print("1. Inventario (Productos)")
+        print("2. Ventas (Caja)")
+        print("3. Salir")
+
+        opcion = input("Elige una opción: ")
+
+        if opcion == '1':
+            mostrar_menu_inventario(servicio_inventario)
+        elif opcion == '2':
+            mostrar_menu_ventas(servicio_ventas)
+        elif opcion == '3':
+            print("¡Hasta luego!")
+            sys.exit()
+        else:
+            print("Opción no válida.")

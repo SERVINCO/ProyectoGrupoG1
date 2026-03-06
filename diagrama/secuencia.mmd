@@ -1,13 +1,30 @@
-mermaid
 sequenceDiagram
     participant U as Usuario
-    participant UI as Interfaz
-    participant S as Servicio
-    participant R as Repositorio
+    participant Menu as Menu (UI)
+    participant SV as ServicioVentas
+    participant SI as ServicioInventario
+    participant DB as Archivos JSON
 
-    U->>UI: Seleccionar opción
-    UI->>S: invocar operación
-    S->>R: leer o actualizar inventario
-    R-->>S: resultados
-    S-->>UI: devolver datos o confirmación
-    UI-->>U: mostrar información
+    Note over U, DB: Ejemplo: Realizar una Venta
+
+    U->>Menu: Selecciona "Realizar Venta"
+    Menu->>U: Pide nombre y cantidad
+    U->>Menu: Ingresa datos ("Manzana", 5)
+    
+    Menu->>SV: realizar_venta("Manzana", 5)
+    
+    SV->>SI: buscar_producto("Manzana")
+    SI->>DB: Cargar productos
+    DB-->>SI: Lista de productos
+    SI-->>SV: Objeto Producto (Stock: 50)
+    
+    SV->>SV: Validar stock (5 <= 50)
+    
+    SV->>SI: actualizar_stock("Manzana", 45)
+    SI->>DB: Guardar productos actualizados
+    
+    SV->>DB: Guardar nueva venta en historial
+    
+    SV-->>Menu: Confirmación "Venta exitosa"
+    Menu-->>U: Muestra Total a Pagar
+

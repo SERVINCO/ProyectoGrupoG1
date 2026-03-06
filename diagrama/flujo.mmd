@@ -1,11 +1,27 @@
-mermaid
-flowchart TD
-    A[Inicio] --> B{Opción}
-    B --> |Registrar producto| C[Solicitar datos]
-    C --> D[Guardar inventario]
-    B --> |Registrar venta| E[Solicitar datos]
-    E --> F[Restar stock]
-    B --> |Consultar inventario| G[Mostrar lista]
-    B --> |Productos bajo stock| H[Revisar cantidades]
-    H --> I[Mostrar alerta]
-    B --> |Salir| J[Fin]
+graph TD
+    A[Inicio] --> B{Menú Principal}
+    
+    B --> |Gestión Inventario| C[Submenú Inventario]
+    B --> |Gestión Ventas| D[Submenú Ventas]
+    B -->|Salir| Z[Fin]
+
+    %% Flujo Inventario
+    C --> C1{Opción Inv.}
+    C1 --> |Agregar| C2[Pedir datos Producto]
+    C2 --> C3[Guardar en JSON]
+    C1 --> |Buscar| C4[Buscar en lista]
+    C4 --> C5[Mostrar Producto]
+    C1 --> |Actualizar Stock| C6[Pedir nueva cantidad]
+    C6 --> C7[Guardar cambios]
+
+    %% Flujo Ventas
+    D --> D1{Opción Ventas}
+    D1 --> |Nueva Venta| D2[Pedir producto y cantidad]
+    D2 --> D3{¿Hay Stock?}
+    D3 -- No --> D4[Error: Stock insuficiente]
+    D3 -- Si --> D5[Restar Stock en Inventario]
+    D5 --> D6[Guardar Venta en Historial]
+    D6 --> D7[Mostrar Total]
+    
+    D1 --> |Listar Ventas| D8[Leer Historial JSON]
+    D8 --> D9[Mostrar Tabla Ventas]
