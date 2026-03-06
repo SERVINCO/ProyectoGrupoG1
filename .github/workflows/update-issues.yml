@@ -1,0 +1,228 @@
+name: Actualizar Issues con Historial
+
+on:
+  push:
+    branches:
+      - copilot/update-issues-history
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  update-issues:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ---------------------------------------------------------------
+      # Issue #1 – Modelo Producto
+      # ---------------------------------------------------------------
+      - name: Comentar Issue 1 – Modelo Producto
+        run: |
+          gh issue comment 1 --repo "$REPO" --body "## ✅ Implementación completada
+
+          Se crearon **dos versiones** del modelo Producto en el proyecto:
+
+          ### \`modelos/producto.py\` (versión principal usada en \`principal.py\`)
+          - Clase \`Producto\` con atributos \`nombre\`, \`cantidad\` y \`precio\` (precio por defecto = 0.0).
+          - Método \`__init__(self, nombre, cantidad, precio=0.0)\` con comentarios didácticos.
+          - Método \`to_dict(self)\` → convierte el producto a diccionario para serialización JSON.
+          - Método \`convertir_a_texto(self)\` → retorna representación legible para el usuario, e.g. \`\"Manzana (Disponibles: 10) - \$1.5\"\`.
+
+          ### \`models/producto.py\` (versión de referencia/segunda iteración)
+          - Misma clase \`Producto\` con atributos \`nombre\`, \`cantidad\` y \`precio\`.
+          - Método \`__init__\` con docstring en formato Args.
+          - Método \`to_dict\` para serialización JSON.
+          - Método \`__str__\` para representación en texto.
+
+          ### Notas
+          - Se agregó el atributo \`precio\` (no estaba en la especificación original pero se necesitaba para calcular totales en ventas).
+          - \`from_dict\` no se implementó como método de clase; la reconstrucción se hace directamente en los servicios."
+
+      - name: Cerrar Issue 1
+        run: gh issue close 1 --repo "$REPO" --comment "Issue cerrado: funcionalidad implementada y en producción."
+
+      # ---------------------------------------------------------------
+      # Issue #2 – Modelo Inventario
+      # ---------------------------------------------------------------
+      - name: Comentar Issue 2 – Modelo Inventario
+        run: |
+          gh issue comment 2 --repo "$REPO" --body "## ✅ Implementación completada
+
+          Se crearon **dos versiones** del modelo Inventario en el proyecto:
+
+          ### \`modelos/inventario.py\` (versión principal usada en \`principal.py\`)
+          - Clase \`Inventario\` con diccionario interno \`self.productos\` (clave: nombre del producto, valor: objeto \`Producto\`).
+          - Método \`agregar_producto(producto)\` → agrega (o sobreescribe) un producto al diccionario.
+          - Método \`buscar_producto(nombre)\` → retorna el objeto \`Producto\` o \`None\`.
+          - Método \`listar_productos()\` → retorna lista con todos los productos.
+
+          ### \`models/inventario.py\` (versión de referencia/segunda iteración)
+          - Misma estructura con diccionario como almacén interno.
+          - Importa \`Producto\` desde \`models.producto\`.
+          - Mismos tres métodos: \`agregar_producto\`, \`buscar_producto\`, \`listar_productos\`.
+
+          ### Notas
+          - Se usó un **diccionario** (en lugar de lista) como estructura interna para búsqueda O(1) por nombre.
+          - Los métodos \`actualizar_stock\` y \`obtener_bajo_stock\` se implementaron a nivel de **ServicioInventario** en lugar del modelo, siguiendo el patrón de capas de la arquitectura del proyecto."
+
+      - name: Cerrar Issue 2
+        run: gh issue close 2 --repo "$REPO" --comment "Issue cerrado: funcionalidad implementada y en producción."
+
+      # ---------------------------------------------------------------
+      # Issue #3 – Repositorio JSON
+      # ---------------------------------------------------------------
+      - name: Comentar Issue 3 – Repositorio JSON
+        run: |
+          gh issue comment 3 --repo "$REPO" --body "## ✅ Implementación completada
+
+          Se implementó la capa de persistencia en \`utils/archivos.py\` como funciones (en lugar de clase), y también existe \`persistence/json_repository.py\` referenciado desde los servicios de la carpeta \`services/\`.
+
+          ### \`utils/archivos.py\` (versión principal)
+          - Función \`cargar_datos(ruta_archivo)\`:
+            - Verifica si el archivo existe con \`os.path.exists()\`.
+            - Si no existe, retorna lista vacía \`[]\`.
+            - Intenta leer y parsear JSON; ante cualquier error retorna \`[]\`.
+          - Función \`guardar_datos(ruta_archivo, datos)\`:
+            - Crea la carpeta automáticamente si no existe (\`os.makedirs\`).
+            - Escribe el JSON con indentación de 4 espacios para legibilidad.
+            - Usa encoding UTF-8.
+
+          ### Dependencias usadas
+          - \`json\` (librería estándar de Python)
+          - \`os\` (librería estándar de Python)
+
+          ### Notas
+          - Se optó por **funciones sueltas** en lugar de clase \`JsonRepository\` para simplificar el uso en todo el proyecto.
+          - La función \`cargar_datos\` siempre retorna una lista (\`[]\` en caso de error), lo que garantiza compatibilidad con el bucle de inicialización del inventario."
+
+      - name: Cerrar Issue 3
+        run: gh issue close 3 --repo "$REPO" --comment "Issue cerrado: funcionalidad implementada y en producción."
+
+      # ---------------------------------------------------------------
+      # Issue #4 – Servicio de Inventario
+      # ---------------------------------------------------------------
+      - name: Comentar Issue 4 – Servicio de Inventario
+        run: |
+          gh issue comment 4 --repo "$REPO" --body "## ✅ Implementación completada
+
+          Se crearon **dos versiones** del servicio de inventario:
+
+          ### \`servicios/servicio_inventario.py\` (versión principal, usada en \`principal.py\`)
+          Clase \`ServicioInventario\`:
+          - \`__init__\`: crea instancia de \`Inventario\` y llama a \`cargar_inventario()\` al iniciar.
+          - \`cargar_inventario()\`: lee el JSON y reconstruye objetos \`Producto\` en memoria.
+          - \`guardar_inventario()\`: serializa todos los productos a dict y escribe el JSON.
+          - \`agregar_producto(nombre, cantidad, precio)\`: valida que no exista, crea \`Producto\`, guarda.
+          - \`buscar_producto(nombre)\`: delega a \`Inventario.buscar_producto()\`.
+          - \`actualizar_stock(nombre, cantidad)\`: busca producto, actualiza cantidad, guarda.
+          - \`listar_productos()\`: imprime todos los productos usando \`convertir_a_texto()\`.
+
+          ### \`services/inventario_service.py\` (versión de referencia/segunda iteración)
+          Clase \`InventarioService\` con los mismos métodos CRUD.
+
+          ### Validaciones implementadas
+          - Producto ya existente al agregar.
+          - Producto no encontrado al actualizar stock.
+          - Stock mínimo configurado en \`configuracion.py\` (STOCK_MINIMO = 5).
+
+          ### Archivos de configuración
+          - \`configuracion.py\`: define \`RUTA_ARCHIVO\`, \`RUTA_VENTAS\` y \`STOCK_MINIMO\`."
+
+      - name: Cerrar Issue 4
+        run: gh issue close 4 --repo "$REPO" --comment "Issue cerrado: funcionalidad implementada y en producción."
+
+      # ---------------------------------------------------------------
+      # Issue #5 – Servicio de Ventas
+      # ---------------------------------------------------------------
+      - name: Comentar Issue 5 – Servicio de Ventas
+        run: |
+          gh issue comment 5 --repo "$REPO" --body "## ✅ Implementación completada
+
+          Se crearon **dos versiones** del servicio de ventas:
+
+          ### \`servicios/servicio_ventas.py\` (versión principal, usada en \`principal.py\`)
+          Clase \`ServicioVentas\`:
+          - \`__init__(servicio_inventario)\`: recibe y guarda referencia al \`ServicioInventario\`.
+          - \`_cargar_ventas()\`: método privado para leer historial de ventas desde JSON.
+          - \`_guardar_ventas(ventas)\`: método privado para escribir historial en JSON.
+          - \`realizar_venta(nombre_producto, cantidad)\`:
+            - Verifica existencia del producto.
+            - Valida que cantidad > 0.
+            - Verifica stock suficiente.
+            - Genera ID autoincremental.
+            - Registra fecha/hora con \`datetime.now()\`.
+            - Calcula total = cantidad × precio.
+            - Descuenta stock del inventario.
+            - Guarda venta en historial JSON.
+          - \`listar_ventas()\`: imprime todas las ventas con ID, fecha, producto, cantidad y total.
+          - \`buscar_venta(id_venta)\`: busca una venta específica por ID.
+          - \`eliminar_venta(id_venta)\`: elimina la venta y **devuelve** el stock al inventario.
+          - \`actualizar_venta(id_venta, nueva_cantidad)\`: ajusta cantidad y stock (diferencia bidireccional).
+
+          ### \`services/venta_service.py\` (versión de referencia/segunda iteración)
+          Clase \`VentaService\` con los mismos métodos CRUD de ventas.
+
+          ### Validaciones implementadas
+          - Producto no existe → mensaje de error.
+          - Cantidad ≤ 0 → mensaje de error.
+          - Stock insuficiente → mensaje de error con stock disponible.
+          - Al actualizar venta: verifica si hay stock extra disponible para aumentar cantidad.
+          - Al eliminar venta: restaura el stock en el inventario."
+
+      - name: Cerrar Issue 5
+        run: gh issue close 5 --repo "$REPO" --comment "Issue cerrado: funcionalidad implementada y en producción."
+
+      # ---------------------------------------------------------------
+      # Issue #6 – Interfaz / Menú
+      # ---------------------------------------------------------------
+      - name: Comentar Issue 6 – Interfaz / Menú
+        run: |
+          gh issue comment 6 --repo "$REPO" --body "## ✅ Implementación completada
+
+          ### \`interfaz/menu.py\`
+          Se implementó la interfaz de usuario completa con menús anidados:
+
+          #### Menú Principal – \`mostrar_menu(servicio_inventario, servicio_ventas)\`
+          - Opción 1: Gestión de Inventario (submenú)
+          - Opción 2: Gestión de Ventas (submenú)
+          - Opción 3: Salir (usa \`sys.exit()\` para cierre limpio)
+
+          #### Submenú Inventario – \`mostrar_menu_inventario(servicio_inventario)\`
+          - Opción 1: Agregar producto → pide nombre, cantidad y precio
+          - Opción 2: Buscar producto → pide nombre y muestra resultado
+          - Opción 3: Actualizar stock → pide nombre y nueva cantidad
+          - Opción 4: Listar productos → muestra todos los productos
+          - Opción 5: Volver al menú principal
+
+          #### Submenú Ventas – \`mostrar_menu_ventas(servicio_ventas)\`
+          - Opción 1: Registrar nueva venta → pide producto y cantidad
+          - Opción 2: Listar historial de ventas
+          - Opción 3: Editar venta → pide ID y nueva cantidad
+          - Opción 4: Eliminar venta → pide ID
+          - Opción 5: Volver al menú principal
+
+          #### Validaciones de entrada
+          - Captura \`ValueError\` en todas las conversiones numéricas (\`int\`, \`float\`).
+          - Muestra mensaje de error descriptivo sin crashear el programa.
+          - Ciclo \`while True\` garantiza que el menú se muestre hasta que el usuario salga.
+
+          ### \`principal.py\`
+          Punto de entrada del programa:
+          1. Crea \`ServicioInventario\` (carga datos desde JSON automáticamente).
+          2. Crea \`ServicioVentas\` (recibe referencia al inventario).
+          3. Llama a \`mostrar_menu()\` para iniciar la interfaz.
+
+          ### Para ejecutar
+          \`\`\`bash
+          python3 principal.py
+          \`\`\`"
+
+      - name: Cerrar Issue 6
+        run: gh issue close 6 --repo "$REPO" --comment "Issue cerrado: funcionalidad implementada y en producción."
