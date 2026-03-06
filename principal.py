@@ -1,25 +1,41 @@
 """
-ARCHIVO PRINCIPAL
------------------
-Este es el punto de inicio. Aquí arranca todo el programa.
-Conecta las partes principales (Inventario, Ventas y Menú) y le da 'play'.
+ARCHIVO PRINCIPAL - AVANCE No. 2
+---------------------------------
+Sistema de Gestión de Inventario
+Menú de la solución programada
+
+Integrantes del Grupo G1:
+Luis Alexander Rodríguez Zamora
+Gabriel Venegas Jarquin
+Demian Rendina Binns
+NANCY FABIOLA JARA HERNANDEZ
+JOSE DANIEL VILLALOBOS CABRERA
+
+Fecha: 6 de marzo de 2026
+
+AVANCE No. 2: Este avance implementa el menú con opciones de Incluir, Consultar,
+Modificar, Borrar y Salir. Las funcionalidades completas se desarrollarán en
+avances posteriores.
 """
 
-from servicios.servicio_inventario import ServicioInventario # Importamos la lógica de productos
-from servicios.servicio_ventas import ServicioVentas # Importamos la lógica de ventas
-from interfaz.menu import mostrar_menu # Importamos la función para iniciar el menú visual
+from interfaz.menu import mostrar_menu # Importamos la función del menú principal
 
 def principal():
-    # 1. Preparamos el servicio de inventario (quien maneja los productos)
-    servicio_inventario = ServicioInventario()
+    """
+    Función principal que inicia el programa.
+    Muestra el mensaje de bienvenida y ejecuta el menú.
+    """
+    print("\n" + "="*60)
+    print("   SISTEMA DE GESTIÓN DE INVENTARIO")
+    print("   Avance No. 2 - Menú de la solución programada")
+    print("="*60)
     
-    # 2. Preparamos el servicio de ventas (quien maneja el dinero), 
-    #    que necesita saber del inventario para descontar productos.
-    servicio_ventas = ServicioVentas(servicio_inventario)
+    # Ejecutamos el menú principal
+    mostrar_menu()
     
-    # 3. Lanzamos el menú para que el usuario pueda usar el programa.
-    mostrar_menu(servicio_inventario, servicio_ventas)
+    print("\nPrograma finalizado exitosamente.")
+    print("="*60)
 
-# Si ejecutamos este archivo directamentes...
+# Si ejecutamos este archivo directamente...
 if __name__ == "__main__":
     principal()

@@ -1,77 +1,104 @@
 """
-SERVICIO DE INVENTARIO
-----------------------
-Aquí está toda la lógica para manejar los productos.
+SERVICIO DE INVENTARIO - PREPARADO PARA AVANCES FUTUROS
+------------------------------------------------------
+
+Este archivo contiene la lógica de negocio para gestionar el inventario.
+Aquí estará toda la lógica para manejar los productos.
+
 Es como el "cerebro" que controla el stock.
-Sabe agregar productos, actualizarlos y guardarlos.
+
+AVANCE No. 2:
+Este archivo NO se usa todavía.
+En avances futuros sabrá agregar productos, actualizarlos y guardarlos.
+
+PRÓXIMOS AVANCES (3+):
+- Este servicio será el "cerebro" que maneja todas las operaciones
+  relacionadas con productos e inventario.
+
+RESPONSABILIDADES:
+1. CRUD de productos (crear, leer, actualizar, eliminar).
+2. Persistencia de datos (guardar/cargar desde JSON).
+3. Validaciones de negocio.
+4. Gestión de stock (alertas de bajo inventario).
+5. Cálculos y reportes.
+
+MÉTODOS A IMPLEMENTAR:
+
+Gestión de productos:
+- agregar_producto(nombre, cantidad, precio)
+- buscar_producto(nombre)
+- actualizar_stock(nombre, cantidad)
+- actualizar_precio(nombre, precio)
+- eliminar_producto(nombre)
+- listar_productos()
+
+Persistencia:
+- cargar_inventario()
+- guardar_inventario()
+
+Validaciones:
+- validar_stock(nombre, cantidad)
+- alertar_stock_bajo()
+- validar_nombre_unico(nombre)
+
+Reportes:
+- generar_reporte_inventario()
+- productos_mas_vendidos()
+- valor_total_inventario()
+
+CONEXIONES FUTURAS:
+- modelos.inventario.Inventario: estructura de datos
+- modelos.producto.Producto: modelo de producto
+- utils.archivos: funciones para leer/escribir JSON
+- configuracion: rutas y constantes
+
+USADO POR:
+- interfaz.menu: opciones del menú principal
+- servicios.servicio_ventas: para verificar stock al vender
+
+ARCHIVOS DE DATOS:
+- Lee/Escribe: base_de_datos/productos.json
+
+EJEMPLO DE USO FUTURO:
+>>> servicio = ServicioInventario()
+>>> servicio.agregar_producto("Leche", 50, 1500.00)
+✓ Producto 'Leche' agregado correctamente
+>>> servicio.actualizar_stock("Leche", 45)
+✓ Stock actualizado: Leche ahora tiene 45 unidades
+>>> producto = servicio.buscar_producto("Leche")
+>>> print(producto.convertir_a_texto())
+'Leche (Disponibles: 45) - ₡1500.00'
+
+FLUJO DE DATOS:
+1. Usuario selecciona "Incluir producto" en menú.
+2. Menú llama a servicio.agregar_producto().
+3. Servicio crea objeto Producto.
+4. Servicio agrega a Inventario en memoria.
+5. Servicio llama a guardar_inventario().
+6. Utils.archivos escribe en productos.json.
+7. Datos persisten en disco.
+
+VALIDACIONES DE NEGOCIO:
+- Stock no puede ser negativo.
+- Precio debe ser mayor a cero.
+- Nombre de producto no puede estar vacío.
+- No permitir productos duplicados.
+- Al eliminar, verificar que no tenga ventas pendientes.
+
+ESTADO:
+Preparado pero no implementado (Avance No. 2)
+
+PRIORIDAD:
+Alta (necesario para Avance 3)
 """
 
-from modelos.inventario import Inventario # Clase contenedora para nuestros productos
-from modelos.producto import Producto     # Clase molde para crear nuevos productos
-from utils.archivos import cargar_datos, guardar_datos # Funciones para leer/escribir en disco
-import configuracion as config            # El archivo donde guardamos rutas y constantes
 
 class ServicioInventario:
-    def __init__(self):
-        # Creamos una lista vacía en memoria y la guardamos en 'self.inventario'.
-        # 'self.inventario' es la base de datos temporal que usará ESTE servicio.
-        self.inventario = Inventario()
-        # Cargamos los datos del archivo usando NUESTRO propio método 'self.cargar_inventario()'.
-        self.cargar_inventario()
+    """
+    Servicio placeholder para futuros avances.
 
-    def cargar_inventario(self):
-        """Lee el archivo JSON y llena la memoria con los productos."""
-        datos = cargar_datos(config.RUTA_ARCHIVO)
-        
-        for data in datos:
-            # Reconvertimos los diccionarios a objetos Producto
-            prod = Producto(data["nombre"], data["cantidad"], data["precio"])
-            # Usamos 'self.inventario' para agregar el producto a NUESTRA lista interna.
-            self.inventario.agregar_producto(prod)
+    La implementación completa se agregará cuando se requiera
+    en el Avance 3 o posteriores.
+    """
 
-    def guardar_inventario(self):
-        """Guarda todo lo que hay en memoria al archivo JSON."""
-        # Necesitamos convertir los objetos a diccionarios simples
-        # Accedemos a NUESTRA lista ('self.inventario') para leer qué productos tenemos.
-        lista_productos = self.inventario.listar_productos()
-        datos = [prod.to_dict() for prod in lista_productos]
-        guardar_datos(config.RUTA_ARCHIVO, datos)
-
-    def agregar_producto(self, nombre, cantidad, precio):
-        """Crea un nuevo producto y lo guarda permanentemente."""
-        # Primero revisamos en NUESTRO inventario ('self.inventario') si ya existe.
-        if self.inventario.buscar_producto(nombre):
-            print("(!) El producto ya existe.")
-            return
-
-        nuevo_producto = Producto(nombre, cantidad, precio)
-        # Si no existe, lo agregamos a NUESTRA lista 'self.inventario'.
-        self.inventario.agregar_producto(nuevo_producto)
-        # Y llamamos a NUESTRO método ('self.guardar_inventario') para actualizar el archivo.
-        self.guardar_inventario() 
-        print("-> Producto agregado correctamente.")
-
-    def buscar_producto(self, nombre):
-        # Delegamos la búsqueda a NUESTRO objeto inventario ('self.inventario').
-        return self.inventario.buscar_producto(nombre)
-
-    def actualizar_stock(self, nombre, cantidad):
-        """Cambia la cantidad de un producto existente."""
-        # Buscamos el producto en NUESTRO inventario.
-        producto = self.inventario.buscar_producto(nombre)
-        if producto:
-            producto.cantidad = cantidad
-            # Guardamos los cambios usando NUESTRO método.
-            self.guardar_inventario()
-            print("-> Stock actualizado.")
-        else:
-            print("(!) Producto no encontrado.")
-
-    def listar_productos(self):
-        lista = self.inventario.listar_productos()
-        if not lista:
-            print("El inventario está vacío.")
-        else:
-            print("\n--- Lista de Productos ---")
-            for prod in lista:
-                print(prod.convertir_a_texto())
+    pass

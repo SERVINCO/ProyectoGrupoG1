@@ -1,153 +1,147 @@
 """
-SERVICIO DE VENTAS
+SERVICIO DE VENTAS - PREPARADO PARA AVANCES FUTUROS
+----------------------------------------------------
+Este archivo contiene la lógica de negocio para gestionar ventas y transacciones.
+
+AVANCE No. 2: Este archivo NO se usa todavía.
+
+PRÓXIMOS AVANCES (4+):
+=======================
+Este servicio manejará todas las operaciones relacionadas con ventas,
+registro de transacciones y cálculos monetarios.
+
+RESPONSABILIDADES:
+-----------------
+1. Registrar ventas de productos
+2. Actualizar inventario automáticamente al vender
+3. Calcular totales y subtotales
+4. Mantener historial de ventas
+5. Generar reportes de ventas
+6. Permitir corrección/eliminación de ventas
+
+MÉTODOS A IMPLEMENTAR:
+---------------------
+### Gestión de Ventas:
+- realizar_venta(nombre_producto, cantidad): Registrar nueva venta
+- listar_ventas(): Mostrar historial completo de ventas
+- buscar_venta(id): Buscar venta específica por ID
+- actualizar_venta(id, cantidad): Corregir cantidad de una venta
+- eliminar_venta(id): Anular venta y devolver stock
+
+### Cálculos:
+- calcular_total_venta(producto, cantidad): Calcular monto de venta
+- total_ventas_dia(): Sumar ventas del día actual
+- total_ventas_mes(): Sumar ventas del mes actual
+- promedio_ventas(): Calcular promedio de ventas
+
+### Persistencia:
+- cargar_ventas(): Leer ventas desde JSON
+- guardar_ventas(): Escribir ventas a JSON
+
+### Reportes:
+- generar_reporte_ventas(): Resumen de todas las ventas
+- productos_mas_vendidos(): Ranking de productos
+- ventas_por_periodo(inicio, fin): Ventas en rango de fechas
+
+CONEXIONES FUTURAS:
 ------------------
-Maneja toda la parte de vender y cobrar.
-Se encarga de restar del inventario, calcular el total ($) y guardar el historial.
+IMPORTA:
+- servicios.servicio_inventario: Para verificar y actualizar stock
+- utils.archivos: Para leer/escribir JSON de ventas
+- configuracion: Rutas y constantes
+- datetime: Para registrar fecha/hora de ventas
+
+USADO POR:
+- interfaz.menu: Opciones de menú de ventas
+
+ARCHIVOS DE DATOS:
+- Lee/Escribe: base_de_datos/ventas.json
+
+ESTRUCTURA DE UNA VENTA:
+------------------------
+{
+    "id": 1,
+    "producto": "Leche",
+    "cantidad": 5,
+    "precio_unitario": 1500.00,
+    "total": 7500.00,
+    "fecha": "2026-03-06 14:30:00"
+}
+
+EJEMPLO DE USO FUTURO:
+---------------------
+>>> servicio_inv = ServicioInventario()
+>>> servicio_ventas = ServicioVentas(servicio_inv)
+>>> 
+>>> # Realizar una venta
+>>> servicio_ventas.realizar_venta("Leche", 5)
+✓ Venta registrada: 5 unidades de Leche por ₡7,500.00
+✓ Stock actualizado: Leche ahora tiene 45 unidades
+>>>
+>>> # Ver historial
+>>> servicio_ventas.listar_ventas()
+ID | Producto | Cantidad | Total    | Fecha
+1  | Leche    | 5        | ₡7500.00 | 06/03/2026 14:30
+>>>
+>>> # Corregir venta (si se equivocaron en cantidad)
+>>> servicio_ventas.actualizar_venta(1, 3)
+✓ Venta actualizada: Nueva cantidad = 3
+✓ Stock devuelto: +2 unidades de Leche
+>>>
+>>> # Eliminar venta (anular transacción)
+>>> servicio_ventas.eliminar_venta(1)
+✓ Venta eliminada
+✓ Stock devuelto: +3 unidades de Leche
+
+FLUJO DE VENTA:
+--------------
+1. Usuario selecciona "Registrar venta" en menú
+2. Ingresa nombre de producto y cantidad
+3. Servicio busca producto en inventario
+4. Valida que hay suficiente stock
+5. Calcula el total (cantidad × precio)
+6. Descuenta del inventario
+7. Registra la venta con fecha/hora
+8. Guarda en ventas.json
+9. Actualiza productos.json
+10. Muestra confirmación al usuario
+
+VALIDACIONES DE NEGOCIO:
+------------------------
+- Producto debe existir en inventario
+- Cantidad debe ser mayor a 0
+- Debe haber suficiente stock disponible
+- No permitir ventas con datos incompletos
+- Al actualizar venta, devolver diferencia al stock
+- Al eliminar venta, devolver todo el stock
+
+INTEGRACIÓN CON INVENTARIO:
+---------------------------
+Este servicio DEPENDE de ServicioInventario:
+- Para verificar existencia de productos
+- Para obtener precios actuales
+- Para actualizar stock después de vender
+- Para validar disponibilidad
+
+REPORTES Y ESTADÍSTICAS:
+-----------------------
+- Total de ventas por día/semana/mes
+- Producto más vendido
+- Ingresos totales
+- Promedio de venta
+- Historial completo de transacciones
+
+ESTADO: 💤 Preparado pero no implementado (Avance No. 2)
+PRIORIDAD: ⭐⭐ Media (necesario para Avance 4+)
+DEPENDENCIAS: Requiere ServicioInventario funcionando
 """
 
-from utils.archivos import cargar_datos, guardar_datos # Para manejar los archivos JSON
-import configuracion as config # Para obtener la ruta del archivo de ventas
-from datetime import datetime # Para registrar la fecha y hora exacta de cada venta
+# Placeholder: La implementación real se agregará en avances futuros
+# Por ahora, solo existe la documentación de lo que contendrá
 
 class ServicioVentas:
-    def __init__(self, servicio_inventario):
-        # Guardamos la conexión con el inventario en 'self.servicio_inventario'.
-        # Así, ESTE servicio de ventas siempre sabrá a quién preguntarle por el stock.
-        self.servicio_inventario = servicio_inventario
-
-    def _cargar_ventas(self):
-        """Lee el archivo de ventas del disco."""
-        # Método interno: Lo usa ESTA clase para leer sus propios datos.
-        return cargar_datos(config.RUTA_VENTAS)
-
-    def _guardar_ventas(self, ventas):
-        """Escribe la lista actualizada de ventas en el disco."""
-        # Método interno: Lo usa ESTA clase para guardar sus cambios.
-        guardar_datos(config.RUTA_VENTAS, ventas)
-
-    def realizar_venta(self, nombre_producto, cantidad):
-        """
-        Registra una venta nueva.
-        """
-        # Usamos 'self.servicio_inventario' para preguntarle al OTRO servicio si hay producto.
-        producto = self.servicio_inventario.buscar_producto(nombre_producto)
-        
-        if not producto:
-            print("(!) El producto no existe.")
-            return
-        
-        # ... (validaciones) ...
-
-        if cantidad <= 0:
-            print("(!) La cantidad debe ser mayor a 0.")
-            return
-
-        if cantidad > producto.cantidad:
-            print(f"(!) No hay suficiente stock. Solo quedan {producto.cantidad}.")
-            return
-
-        # Usamos NUESTRO método interno ('self._cargar_ventas') para ver qué ID sigue.
-        ventas = self._cargar_ventas()
-        nuevo_id = 1
-        if ventas:
-            nuevo_id = max(v.get("id", 0) for v in ventas) + 1
-
-        total = cantidad * producto.precio
-        
-        # ... (creación venta) ...
-        nueva_venta = {
-            "id": nuevo_id,
-            "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "producto": nombre_producto,
-            "cantidad": cantidad,
-            "total": total
-        }
-
-        # Actualizamos el stock en el inventario usando la conexión que guardamos ('self.servicio_inventario').
-        producto.cantidad -= cantidad 
-        self.servicio_inventario.actualizar_stock(nombre_producto, producto.cantidad)
-
-        # Guardamos usando NUESTRO método interno.
-        ventas.append(nueva_venta)
-        self._guardar_ventas(ventas)
-        print(f"-> Venta #{nuevo_id} exitosa. Total a pagar: ${total}")
-
-    def listar_ventas(self):
-        """Muestra todas las ventas que se han hecho."""
-        # Usamos 'self._cargar_ventas' para obtener SOLO las ventas de este sistema.
-        ventas = self._cargar_ventas()
-        if not ventas:
-            print("No hay ventas registradas todavía.")
-        else:
-            print("\n--- Historial de Ventas ---")
-            for v in ventas:
-                print(f"ID: {v.get('id')} | Fecha: {v['fecha']} | Producto: {v['producto']} | Cant: {v['cantidad']} | Total: ${v['total']}")
-
-    def buscar_venta(self, id_venta):
-        # Buscamos en NUESTRAS ventas.
-        ventas = self._cargar_ventas()
-        for v in ventas:
-            if v.get("id") == id_venta:
-                return v
-        return None
-
-    def eliminar_venta(self, id_venta):
-        ventas = self._cargar_ventas()
-        venta_a_borrar = None
-        
-        for v in ventas:
-            if v.get("id") == id_venta:
-                venta_a_borrar = v
-                break
-        
-        if not venta_a_borrar:
-            print("(!) Venta no encontrada.")
-            return
-
-        # Usamos 'self.servicio_inventario' para devolver el stock al inventario.
-        producto = self.servicio_inventario.buscar_producto(venta_a_borrar["producto"])
-        if producto:
-            nuevo_stock = producto.cantidad + venta_a_borrar["cantidad"]
-            self.servicio_inventario.actualizar_stock(producto.nombre, nuevo_stock)
-
-        ventas.remove(venta_a_borrar)
-        self._guardar_ventas(ventas)
-        print(f"-> Venta #{id_venta} eliminada. Stock devuelto.")
-
-    def actualizar_venta(self, id_venta, nueva_cantidad):
-        ventas = self._cargar_ventas()
-        idx_venta = -1
-        
-        for i, v in enumerate(ventas):
-            if v.get("id") == id_venta:
-                idx_venta = i
-                break
-        
-        if idx_venta == -1:
-            print("(!) Venta no encontrada.")
-            return
-
-        venta_actual = ventas[idx_venta]
-        producto_nombre = venta_actual["producto"]
-        # Usamos 'self.servicio_inventario' otra vez.
-        producto = self.servicio_inventario.buscar_producto(producto_nombre)
-        
-        # ... (resto del código igual) ...
-        if not producto:
-            print("(!) El producto ya no existe en la base de datos.")
-            return
-
-        diferencia = nueva_cantidad - venta_actual["cantidad"]
-
-        if diferencia > 0 and producto.cantidad < diferencia:
-            print(f"(!) No hay suficiente stock extra. Disponible: {producto.cantidad}")
-            return
-
-        producto.cantidad -= diferencia
-        self.servicio_inventario.actualizar_stock(producto_nombre, producto.cantidad)
-
-        venta_actual["cantidad"] = nueva_cantidad
-        venta_actual["total"] = nueva_cantidad * producto.precio
-        
-        self._guardar_ventas(ventas)
-        print(f"-> Venta #{id_venta} corregida. Nuevo total: ${venta_actual['total']}")
+    """
+    Servicio placeholder para futuros avances.
+    La implementación completa se agregará cuando se requiera en Avance 4+.
+    """
+    pass
