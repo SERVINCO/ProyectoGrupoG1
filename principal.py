@@ -5,9 +5,9 @@ Este es el punto de inicio. Aquí arranca todo el programa.
 Conecta las partes principales (Inventario, Ventas y Menú) y le da 'play'.
 """
 
-from servicios.servicio_inventario import ServicioInventario
-from servicios.servicio_ventas import ServicioVentas
-from interfaz.menu import mostrar_menu
+from servicios.servicio_inventario import ServicioInventario # Importamos la lógica de productos
+from servicios.servicio_ventas import ServicioVentas # Importamos la lógica de ventas
+from interfaz.menu import mostrar_menu # Importamos la función para iniciar el menú visual
 
 def principal():
     # 1. Preparamos el servicio de inventario (quien maneja los productos)

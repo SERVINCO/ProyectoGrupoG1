@@ -5,8 +5,8 @@ Funciones de ayuda para cargar y guardar la información.
 Se encarga de leer y escribir en los archivos JSON.
 """
 
-import json
-import os
+import json # Librería estándar de Python para manejar el formato JSON
+import os   # Librería para interactuar con el sistema operativo (archivos, carpetas)
 
 def cargar_datos(ruta_archivo):
     """

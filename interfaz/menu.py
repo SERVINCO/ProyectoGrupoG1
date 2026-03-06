@@ -3,10 +3,10 @@ INTERFAZ DE USUARIO (Menú)
 --------------------------
 Este archivo controla lo que ves en la pantalla (el menú).
 Es como el "control remoto" de la aplicación.
-Usa un sistema de diccionario (parecido a un 'switch') para elegir qué hacer.
+Usa instrucciones 'if' ("si pasa esto..." "haz esto...") para elegir qué hacer.
 """
 
-import sys
+import sys  # Importamos la librería 'sys' para poder cerrar el programa limpiamente (sys.exit)
 
 # --- Funciones para el Menú de Inventario ---
 
@@ -42,10 +42,6 @@ def opcion_listar_productos(servicio):
     """Muestra todos los productos."""
     servicio.listar_productos()
 
-def opcion_volver_menu_principal(servicio):
-    """Saled del bucle del sub-menú (retorna control al menú principal)."""
-    return "salir" # Retornamos una señal para romper el bucle
-
 # --- Funciones para el Menú de Ventas ---
 
 def opcion_nueva_venta(servicio):
@@ -80,19 +76,12 @@ def opcion_eliminar_venta(servicio):
 
 # --- Estructura de los Menús ---
 
+
 def mostrar_menu_inventario(servicio_inventario):
     """
     Muestra las opciones de inventario.
-    Usa un diccionario 'acciones' para simular un Switch/Case.
+    Usa instrucciones IF para decidir qué hacer según la opción.
     """
-    acciones = {
-        '1': opcion_agregar_producto,
-        '2': opcion_buscar_producto,
-        '3': opcion_actualizar_stock,
-        '4': opcion_listar_productos,
-        '5': opcion_volver_menu_principal
-    }
-
     while True:
         print("\n--- GESTIÓN DE INVENTARIO ---")
         print("1. Agregar producto")
@@ -103,28 +92,26 @@ def mostrar_menu_inventario(servicio_inventario):
 
         opcion = input("Elige una opción: ")
 
-        # Busca la función en el diccionario. Si no existe, devuelve None via 'get'
-        funcion = acciones.get(opcion)
-
-        if funcion:
-            resultado = funcion(servicio_inventario)
-            if resultado == "salir":
-                break
+        if opcion == '1':
+            opcion_agregar_producto(servicio_inventario)
+        elif opcion == '2':
+            opcion_buscar_producto(servicio_inventario)
+        elif opcion == '3':
+            opcion_actualizar_stock(servicio_inventario)
+        elif opcion == '4':
+            opcion_listar_productos(servicio_inventario)
+        elif opcion == '5':
+            # "break" rompe el bucle while y sale de esta función
+            break
         else:
             print("Opción no válida, intenta de nuevo.")
+
 
 def mostrar_menu_ventas(servicio_ventas):
     """
     Muestra las opciones de ventas.
+    También usa un IF/ELSE grande para decidir.
     """
-    acciones = {
-        '1': opcion_nueva_venta,
-        '2': opcion_listar_ventas,
-        '3': opcion_editar_venta,
-        '4': opcion_eliminar_venta,
-        '5': opcion_volver_menu_principal
-    }
-
     while True:
         print("\n--- GESTIÓN DE VENTAS ---")
         print("1. Registrar nueva venta")
@@ -135,12 +122,17 @@ def mostrar_menu_ventas(servicio_ventas):
 
         opcion = input("Elige una opción: ")
 
-        funcion = acciones.get(opcion)
-
-        if funcion:
-            resultado = funcion(servicio_ventas)
-            if resultado == "salir":
-                break
+        if opcion == '1':
+            opcion_nueva_venta(servicio_ventas)
+        elif opcion == '2':
+            opcion_listar_ventas(servicio_ventas)
+        elif opcion == '3':
+            opcion_editar_venta(servicio_ventas)
+        elif opcion == '4':
+            opcion_eliminar_venta(servicio_ventas)
+        elif opcion == '5':
+            # "break" nos saca de la función de ventas y vuelve al menú principal
+            break
         else:
             print("Opción no válida, intenta de nuevo.")
 
