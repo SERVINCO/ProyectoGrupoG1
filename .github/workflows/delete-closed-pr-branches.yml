@@ -1,0 +1,56 @@
+name: Borrar ramas de PRs cerrados
+
+on:
+  pull_request:
+    types:
+      - closed
+
+permissions:
+  contents: write
+
+jobs:
+  delete-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Borrar rama del PR cerrado
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const branch = pr.head.ref;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // No borrar ramas de forks externos
+            if (pr.head.repo.full_name !== pr.base.repo.full_name) {
+              console.log(`El PR viene de un fork (${pr.head.repo.full_name}). No se borrará la rama.`);
+              return;
+            }
+
+            // No borrar ramas protegidas según la API de GitHub
+            try {
+              await github.rest.repos.getBranchProtection({ owner, repo, branch });
+              console.log(`La rama '${branch}' está protegida y no se borrará.`);
+              return;
+            } catch (protectionError) {
+              // Si devuelve 404, la rama no está protegida: podemos continuar
+              if (protectionError.status !== 404) {
+                throw protectionError;
+              }
+            }
+
+            try {
+              await github.rest.git.deleteRef({
+                owner,
+                repo,
+                ref: `heads/${branch}`,
+              });
+              console.log(`Rama '${branch}' borrada exitosamente.`);
+            } catch (error) {
+              if (error.status === 422) {
+                console.log(`La rama '${branch}' ya no existe.`);
+              } else {
+                throw error;
+              }
+            }
