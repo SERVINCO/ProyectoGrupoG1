@@ -1,0 +1,122 @@
+name: Limpiar ramas de PRs cerrados existentes
+
+on:
+  workflow_dispatch:
+    inputs:
+      dias_atras:
+        description: 'Borrar ramas de PRs cerrados en los últimos N días (0 = todos)'
+        required: false
+        default: '0'
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  limpiar-ramas:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Borrar ramas de todos los PRs cerrados
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const diasAtras = parseInt(context.payload.inputs.dias_atras || '0', 10);
+            const fechaLimite = diasAtras > 0
+              ? new Date(Date.now() - diasAtras * 24 * 60 * 60 * 1000)
+              : null;
+
+            if (fechaLimite) {
+              console.log(`Filtrando PRs cerrados desde: ${fechaLimite.toISOString()}`);
+            } else {
+              console.log('Procesando todos los PRs cerrados (sin límite de fecha).');
+            }
+
+            // Obtener todos los PRs cerrados (paginado)
+            let page = 1;
+            let allClosedPRs = [];
+            while (true) {
+              const { data: prs } = await github.rest.pulls.list({
+                owner,
+                repo,
+                state: 'closed',
+                per_page: 100,
+                page,
+              });
+              if (prs.length === 0) break;
+              allClosedPRs = allClosedPRs.concat(prs);
+              page++;
+            }
+
+            console.log(`Se encontraron ${allClosedPRs.length} PR(s) cerrado(s).`);
+
+            // Aplicar filtro de fecha si fue especificado
+            const prsFiltrados = fechaLimite
+              ? allClosedPRs.filter(p => new Date(p.closed_at) >= fechaLimite)
+              : allClosedPRs;
+            console.log(`PRs a procesar: ${prsFiltrados.length}`);
+
+            let borradas = 0;
+            let omitidas = 0;
+
+            for (const pr of prsFiltrados) {
+              const branch = pr.head.ref;
+
+              // Omitir PRs de forks externos
+              if (!pr.head.repo || pr.head.repo.full_name !== pr.base.repo.full_name) {
+                console.log(`PR #${pr.number}: viene de un fork. Se omite.`);
+                omitidas++;
+                continue;
+              }
+
+              // Verificar si la rama sigue existiendo
+              try {
+                await github.rest.git.getRef({
+                  owner,
+                  repo,
+                  ref: `heads/${branch}`,
+                });
+              } catch (notFound) {
+                if (notFound.status === 404) {
+                  console.log(`PR #${pr.number}: la rama '${branch}' ya no existe.`);
+                  omitidas++;
+                  continue;
+                }
+                throw notFound;
+              }
+
+              // Verificar si la rama está protegida
+              try {
+                await github.rest.repos.getBranchProtection({ owner, repo, branch });
+                console.log(`PR #${pr.number}: la rama '${branch}' está protegida. Se omite.`);
+                omitidas++;
+                continue;
+              } catch (protErr) {
+                if (protErr.status !== 404) throw protErr;
+                // 404 = no tiene protección → se puede borrar
+              }
+
+              // Borrar la rama
+              try {
+                await github.rest.git.deleteRef({
+                  owner,
+                  repo,
+                  ref: `heads/${branch}`,
+                });
+                console.log(`PR #${pr.number}: rama '${branch}' borrada.`);
+                borradas++;
+              } catch (delErr) {
+                // GitHub devuelve 422 al intentar borrar una ref que ya no existe
+                if (delErr.status === 422 || delErr.status === 404) {
+                  console.log(`PR #${pr.number}: la rama '${branch}' ya no existe (${delErr.status}).`);
+                  omitidas++;
+                } else {
+                  throw delErr;
+                }
+              }
+            }
+
+            console.log(`\nResumen: ${borradas} rama(s) borrada(s), ${omitidas} omitida(s).`);
