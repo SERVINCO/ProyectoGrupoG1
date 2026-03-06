@@ -1,9 +1,8 @@
 """
 INTERFAZ DE USUARIO (Menú)
 --------------------------
-Este archivo controla lo que ves en la pantalla (el menú).
-Es como el "control remoto" de la aplicación.
-Usa instrucciones 'if' ("si pasa esto..." "haz esto...") para elegir qué hacer.
+Este archivo controla lo que ves en la pantalla cuando ejecutas el programa.
+Muestra las opciones y recibe lo que escribas para saber qué hacer.
 """
 
 import sys  # Importamos la librería 'sys' para poder cerrar el programa limpiamente (sys.exit)
@@ -77,10 +76,10 @@ def opcion_eliminar_venta(servicio):
 # --- Estructura de los Menús ---
 
 
+
 def mostrar_menu_inventario(servicio_inventario):
     """
-    Muestra las opciones de inventario.
-    Usa instrucciones IF para decidir qué hacer según la opción.
+    Función que maneja las opciones de inventario.
     """
     while True:
         print("\n--- GESTIÓN DE INVENTARIO ---")
@@ -98,19 +97,20 @@ def mostrar_menu_inventario(servicio_inventario):
             opcion_buscar_producto(servicio_inventario)
         elif opcion == '3':
             opcion_actualizar_stock(servicio_inventario)
+
         elif opcion == '4':
             opcion_listar_productos(servicio_inventario)
         elif opcion == '5':
-            # "break" rompe el bucle while y sale de esta función
+            # "break" sale de la función actual y el programa continúa donde se llamó
             break
         else:
             print("Opción no válida, intenta de nuevo.")
 
 
+
 def mostrar_menu_ventas(servicio_ventas):
     """
-    Muestra las opciones de ventas.
-    También usa un IF/ELSE grande para decidir.
+    Función que maneja las opciones de ventas.
     """
     while True:
         print("\n--- GESTIÓN DE VENTAS ---")
@@ -128,10 +128,11 @@ def mostrar_menu_ventas(servicio_ventas):
             opcion_listar_ventas(servicio_ventas)
         elif opcion == '3':
             opcion_editar_venta(servicio_ventas)
+
         elif opcion == '4':
             opcion_eliminar_venta(servicio_ventas)
         elif opcion == '5':
-            # "break" nos saca de la función de ventas y vuelve al menú principal
+            # "break" sale de la función actual y el programa vuelve al menú principal
             break
         else:
             print("Opción no válida, intenta de nuevo.")
